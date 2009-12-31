@@ -9,7 +9,6 @@ from django.db.models import sql
 from django.db.transaction import savepoint_state
 from django.utils.hashcompat import md5_constructor
 from django.utils.encoding import smart_unicode
-from django.db.models.sql import BaseQuery
 from django.db.models.query import QuerySet
 
 try:
@@ -70,11 +69,7 @@ class DBLogManager(models.Manager):
             return super(DBLogManager, self).get_query_set()
         connection = self.get_db_wrapper(db_options)
         
-        if connection.features.uses_custom_query_class:
-            Query = connection.ops.query_class(BaseQuery)
-        else:
-            Query = BaseQuery
-        return QuerySet(self.model, Query(self.model, connection))
+        return QuerySet(model=self.model, using=connection)
 
     def get_db_wrapper(self, options):
         global _connection
